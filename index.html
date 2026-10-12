@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>EarnLoop - Watch & Earn</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:#f5f7fb;font-family:Arial,sans-serif}
+header{padding:22px 18px;background:#172338}
+.logo{font-size:25px;font-weight:bold;color:#6ee7b7}
+header p{color:#bdc8d9;font-size:14px}
+main{padding:18px;max-width:650px;margin:auto}
+.balance{background:linear-gradient(135deg,#087f68,#155e75);padding:22px;border-radius:18px}
+.balance p{margin:0;color:#d5fff1}
+.balance h1{font-size:36px;margin:10px 0}
+.note{font-size:12px;color:#d5fff1}
+h2{font-size:19px;margin-top:26px}
+.card{background:#1b293d;padding:16px;border-radius:14px;margin:12px 0}
+.card p{color:#bdc8d9;font-size:14px;line-height:1.5}
+button{border:0;border-radius:9px;background:#6ee7b7;color:#10251e;font-size:15px;font-weight:bold;padding:12px 15px;cursor:pointer}
+button:disabled{opacity:.5}
+.tag{color:#6ee7b7;font-size:13px}
+.video{background:#263b50;border-radius:10px;padding:18px;text-align:center;margin-bottom:12px}
+.video span{font-size:38px}
+#status{color:#6ee7b7;font-size:14px;min-height:20px}
+footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">✦ EarnLoop</div>
+  <p>Watch. Complete tasks. Collect points.</p>
+</header>
+
+<main>
+  <div class="balance">
+    <p>Your demo balance</p>
+    <h1><span id="points">0</span> points</h1>
+    <div class="note">Prototype points have no cash value.</div>
+  </div>
+
+  <h2>🎬 Watch & Earn</h2>
+  <div class="card">
+    <div class="video">
+      <span>▶️</span>
+      <p>Welcome to EarnLoop</p>
+    </div>
+    <h3>Welcome video task</h3>
+    <p>Try a short demo task to test how your rewards website works.</p>
+    <p class="tag">Reward: 10 demo points</p>
+    <button id="watch" onclick="startTask()">Start demo task</button>
+    <p id="status"></p>
+  </div>
+
+  <h2>✅ Daily Tasks</h2>
+  <div class="card">
+    <h3>Explore EarnLoop</h3>
+    <p>Test your first task and learn how points appear in your demo wallet.</p>
+    <button onclick="startTask()">Try task</button>
+  </div>
+
+  <h2>🎁 Rewards</h2>
+  <div class="card">
+    <h3>PayPal & Gift Cards</h3>
+    <p>These are planned redemption options. Payouts are not available yet.</p>
+    <button onclick="alert('Real withdrawals are not enabled in this demo.')">
+      Coming soon
+    </button>
+  </div>
+
+  <h2>ℹ️ About this website</h2>
+  <div class="card">
+    <p>EarnLoop is an early prototype. Points are for testing only. No real money is earned or paid. Video tasks are demonstrations, not paid advertisements.</p>
+  </div>
+</main>
+
+<footer>EarnLoop © 2026 · Demo rewards website</footer>
+
+<script>
+let points = Number(localStorage.getItem("earnloop_points") || 0);
+document.getElementById("points").textContent = points;
+
+let busy = false;
+
+function startTask() {
+  if (busy) return;
+
+  busy = true;
+  const button = document.getElementById("watch");
+  const status = document.getElementById("status");
+  button.disabled = true;
+
+  let seconds = 10;
+  status.textContent = "Demo task in progress: " + seconds + " seconds";
+
+  const timer = setInterval(function() {
+    seconds--;
+
+    if (seconds > 0) {
+      status.textContent =
+        "Demo task in progress: " + seconds + " seconds";
+    } else {
+      clearInterval(timer);
+      points += 10;
+      localStorage.setItem("earnloop_points", points);
+      document.getElementById("points").textContent = points;
+      status.textContent = "10 demo points added! No cash value.";
+      button.disabled = false;
+      busy = false;
+    }
+  }, 1000);
+}
+</script>
+</body>
+</html>
