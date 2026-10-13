@@ -117,8 +117,8 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
 <script>
 /*
 */
-const SUPABASE_URL = "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy";
-const SUPABASE_PUBLISHABLE_KEY = "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2AG4v08IWZgGfQxw3JaTg_NhDvDZvy";
 
 const authForm = document.getElementById("auth-form");
 const emailInput = document.getElementById("auth-email");
@@ -171,7 +171,8 @@ function getSupabaseClient() {
     SUPABASE_URL === "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/" ||
     SUPABASE_PUBLISHABLE_KEY === "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy"
   ) {
-    showAuthMessage("Setup needed: add your Supabase Project URL and public publishable key in the code.");
+    show
+      AuthMessage("Setup needed: add your Supabase Project URL and public publishable key in the code.");
     return null;
   }
 
