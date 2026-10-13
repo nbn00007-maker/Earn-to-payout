@@ -116,13 +116,9 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
 
 <script>
 /*
-  IMPORTANT:
-  Replace these two placeholder strings with your own
-  Supabase Project URL and public publishable key.
-  Never put a service-role or secret key here.
 */
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_URL = "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy";
+const SUPABASE_PUBLISHABLE_KEY = "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/";
 
 const authForm = document.getElementById("auth-form");
 const emailInput = document.getElementById("auth-email");
@@ -172,8 +168,8 @@ function getSupabaseClient() {
   }
 
   if (
-    SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" ||
-    SUPABASE_PUBLISHABLE_KEY === "YOUR_SUPABASE_PUBLISHABLE_KEY"
+    SUPABASE_URL === "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/" ||
+    SUPABASE_PUBLISHABLE_KEY === "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy"
   ) {
     showAuthMessage("Setup needed: add your Supabase Project URL and public publishable key in the code.");
     return null;
