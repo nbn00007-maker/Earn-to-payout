@@ -28,7 +28,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .video span{font-size:38px}
 #status{color:#6ee7b7;font-size:14px;min-height:20px}
 footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
-
 #account-section label{display:block;margin:12px 0 6px}
 #account-section input{display:block;width:100%;padding:12px;border-radius:8px;border:1px solid #526176;background:#101827;color:#f5f7fb;margin-bottom:12px;font-size:16px}
 #account-section button{margin:4px 4px 4px 0}
@@ -46,7 +45,6 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
 </header>
 
 <main>
-
   <section class="card" id="account-section">
     <h2>🔐 Your Account</h2>
     <p>Create an account or log in to EarnLoop.</p>
@@ -54,12 +52,12 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
     <form id="auth-form">
       <label for="auth-email">Email address</label>
       <input id="auth-email" type="email" required
-             autocomplete="email" placeholder="you@example.com">
+        autocomplete="email" placeholder="you@example.com">
 
       <label for="auth-password">Password</label>
       <input id="auth-password" type="password" required
-             minlength="6" autocomplete="current-password"
-             placeholder="At least 6 characters">
+        minlength="6" autocomplete="current-password"
+        placeholder="At least 6 characters">
 
       <button type="submit" id="signup-button">Create account</button>
       <button type="button" id="login-button">Log in</button>
@@ -73,7 +71,7 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
   <div class="balance">
     <p>Your demo balance</p>
     <h1><span id="points">0</span> points</h1>
-    <div class="note">Prototype points have no cash value.</div>
+    <div class="note">Demo points have no cash value.</div>
   </div>
 
   <h2>🎬 Watch & Earn</h2>
@@ -83,42 +81,41 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
       <p>Welcome to EarnLoop</p>
     </div>
     <h3>Welcome video task</h3>
-    <p>Try a short demo task to test how your rewards website works.</p>
+    <p>Try a short demo task to test your rewards website.</p>
     <p class="tag">Reward: 10 demo points</p>
-    <button id="watch" onclick="startTask()">Start demo task</button>
-    <p id="status"></p>
+    <button id="watch" type="button" onclick="startTask()">Start demo task</button>
+    <p id="status" aria-live="polite"></p>
   </div>
 
   <h2>✅ Daily Tasks</h2>
   <div class="card">
     <h3>Explore EarnLoop</h3>
-    <p>Test your first task and learn how points appear in your demo wallet.</p>
-    <button onclick="startTask()">Try task</button>
+    <p>Test a task and learn how demo points appear in your wallet.</p>
+    <button type="button" onclick="startTask()">Try task</button>
   </div>
 
   <h2>🎁 Rewards</h2>
   <div class="card">
     <h3>PayPal & Gift Cards</h3>
-    <p>These are planned redemption options. Payouts are not available yet.</p>
-    <button onclick="alert('Real withdrawals are not enabled in this demo.')">
-      Coming soon
-    </button>
+    <p>These are planned redemption options. Real payouts are not available yet.</p>
+    <button type="button" onclick="alert('Real withdrawals are not enabled yet.')">Coming soon</button>
   </div>
 
-  <h2>ℹ️ About this website</h2>
+  <h2>ℹ️ About EarnLoop</h2>
   <div class="card">
-    <p>EarnLoop is an early prototype. Points are for testing only. No real money is earned or paid. Video tasks are demonstrations, not paid advertisements.</p>
+    <p>EarnLoop is an early prototype. Points are for testing only. No real money is earned or paid. Tasks are demonstrations, not paid advertisements.</p>
   </div>
-
 </main>
 
 <footer>EarnLoop © 2026 · Demo rewards website</footer>
 
 <script>
-/*
-*/
+"use strict";
+
+// Supabase settings.
+// Use the URL and publishable key from the SAME Supabase project.
 const SUPABASE_URL = "https://xcbtmtkdhdufkporwgpm.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2AG4v08IWZgGfQxw3JaTg_NhDvDZvy";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_EXACT_PUBLISHABLE_KEY_HERE";
 
 const authForm = document.getElementById("auth-form");
 const emailInput = document.getElementById("auth-email");
@@ -147,11 +144,10 @@ function updateAccount(session) {
   const user = session && session.user;
 
   if (user) {
-    accountStatus.textContent = "Logged in as " + user.email;
+    accountStatus.textContent = "Logged in as " + (user.email || "your account");
     signupButton.hidden = true;
     loginButton.hidden = true;
     logoutButton.hidden = false;
-    emailInput.value = user.email || "";
     passwordInput.value = "";
   } else {
     accountStatus.textContent = "You are not logged in.";
@@ -163,16 +159,15 @@ function updateAccount(session) {
 
 function getSupabaseClient() {
   if (!window.supabase || !window.supabase.createClient) {
-    showAuthMessage("Supabase library did not load. Check your internet connection and reload.");
+    showAuthMessage("Supabase library did not load. Check your internet and refresh the page.");
     return null;
   }
 
   if (
-    SUPABASE_URL === "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/" ||
-    SUPABASE_PUBLISHABLE_KEY === "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy"
+    !SUPABASE_URL.startsWith("https://") ||
+    SUPABASE_PUBLISHABLE_KEY === "PASTE_YOUR_EXACT_PUBLISHABLE_KEY_HERE"
   ) {
-    show
-      AuthMessage("Setup needed: add your Supabase Project URL and public publishable key in the code.");
+    showAuthMessage("Setup needed: enter your Supabase URL and publishable key in the code.");
     return null;
   }
 
@@ -188,7 +183,6 @@ function getSupabaseClient() {
 
 authForm.addEventListener("submit", async function(event) {
   event.preventDefault();
-
   if (authBusy) return;
 
   const client = getSupabaseClient();
@@ -209,7 +203,7 @@ authForm.addEventListener("submit", async function(event) {
       updateAccount(data.session);
       showAuthMessage("Account created successfully!");
     } else {
-      showAuthMessage("Registration submitted. Check your email for the confirmation link before logging in.");
+      showAuthMessage("Registration submitted. Check your email for a confirmation link, then log in.");
     }
   } catch (error) {
     showAuthMessage(error.message || "Registration failed. Please try again.");
@@ -243,7 +237,7 @@ loginButton.addEventListener("click", async function() {
     updateAccount(data.session);
     showAuthMessage("Login successful!");
   } catch (error) {
-    showAuthMessage(error.message || "Login failed. Check your details and try again.");
+    showAuthMessage(error.message || "Login failed. Check your email and password.");
   } finally {
     setAuthBusy(false);
   }
@@ -278,35 +272,33 @@ async function restoreSession() {
   try {
     const { data, error } = await client.auth.getSession();
     if (error) throw error;
-
     updateAccount(data.session);
   } catch (error) {
-    showAuthMessage("Could not check your login session. Reload the page and try again.");
+    showAuthMessage("Could not check your login session. Refresh the page and try again.");
   }
 }
 
-if (window.supabase && window.supabase.createClient &&
-    SUPABASE_URL !== "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/" &&
-    SUPABASE_PUBLISHABLE_KEY !== "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy") {
+if (window.supabase && window.supabase.createClient) {
   restoreSession();
 } else {
+  showAuthMessage("Loading Supabase failed. Check your internet and refresh the page.");
   updateAccount(null);
 }
 
-/* Demo-only points: these are stored locally and are NOT secure rewards. */
+// Demo-only points. They are stored on this device and are not secure rewards.
 let points = Number(localStorage.getItem("earnloop_points") || 0);
 if (!Number.isFinite(points) || points < 0) points = 0;
 document.getElementById("points").textContent = points;
 
-let busy = false;
+let taskBusy = false;
 
 function startTask() {
-  if (busy) return;
+  if (taskBusy) return;
 
-  busy = true;
-  const button = document.getElementById("watch");
+  taskBusy = true;
+  const watchButton = document.getElementById("watch");
   const status = document.getElementById("status");
-  button.disabled = true;
+  watchButton.disabled = true;
 
   let seconds = 10;
   status.textContent = "Demo task in progress: " + seconds + " seconds";
@@ -315,16 +307,15 @@ function startTask() {
     seconds--;
 
     if (seconds > 0) {
-      status.textContent =
-        "Demo task in progress: " + seconds + " seconds";
+      status.textContent = "Demo task in progress: " + seconds + " seconds";
     } else {
       clearInterval(timer);
       points += 10;
       localStorage.setItem("earnloop_points", String(points));
       document.getElementById("points").textContent = points;
       status.textContent = "10 demo points added! No cash value.";
-      button.disabled = false;
-      busy = false;
+      watchButton.disabled = false;
+      taskBusy = false;
     }
   }, 1000);
 }
