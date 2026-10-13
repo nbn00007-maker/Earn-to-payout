@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#101827">
 <title>EarnLoop - Watch & Earn</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#101827;color:#f5f7fb;font-family:Arial,sans-serif}
@@ -21,14 +22,23 @@ h2{font-size:19px;margin-top:26px}
 .card{background:#1b293d;padding:16px;border-radius:14px;margin:12px 0}
 .card p{color:#bdc8d9;font-size:14px;line-height:1.5}
 button{border:0;border-radius:9px;background:#6ee7b7;color:#10251e;font-size:15px;font-weight:bold;padding:12px 15px;cursor:pointer}
-button:disabled{opacity:.5}
+button:disabled{opacity:.5;cursor:not-allowed}
 .tag{color:#6ee7b7;font-size:13px}
 .video{background:#263b50;border-radius:10px;padding:18px;text-align:center;margin-bottom:12px}
 .video span{font-size:38px}
 #status{color:#6ee7b7;font-size:14px;min-height:20px}
 footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
+
+#account-section label{display:block;margin:12px 0 6px}
+#account-section input{display:block;width:100%;padding:12px;border-radius:8px;border:1px solid #526176;background:#101827;color:#f5f7fb;margin-bottom:12px;font-size:16px}
+#account-section button{margin:4px 4px 4px 0}
+#auth-message{color:#6ee7b7;overflow-wrap:anywhere}
+#account-status{color:#bdc8d9;overflow-wrap:anywhere}
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 <header>
   <div class="logo">✦ EarnLoop</div>
@@ -36,6 +46,30 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
 </header>
 
 <main>
+
+  <section class="card" id="account-section">
+    <h2>🔐 Your Account</h2>
+    <p>Create an account or log in to EarnLoop.</p>
+
+    <form id="auth-form">
+      <label for="auth-email">Email address</label>
+      <input id="auth-email" type="email" required
+             autocomplete="email" placeholder="you@example.com">
+
+      <label for="auth-password">Password</label>
+      <input id="auth-password" type="password" required
+             minlength="6" autocomplete="current-password"
+             placeholder="At least 6 characters">
+
+      <button type="submit" id="signup-button">Create account</button>
+      <button type="button" id="login-button">Log in</button>
+      <button type="button" id="logout-button" hidden>Log out</button>
+    </form>
+
+    <p id="account-status">You are not logged in.</p>
+    <p id="auth-message" role="status" aria-live="polite"></p>
+  </section>
+
   <div class="balance">
     <p>Your demo balance</p>
     <h1><span id="points">0</span> points</h1>
@@ -75,12 +109,196 @@ footer{text-align:center;padding:24px;color:#aeb9ca;font-size:12px}
   <div class="card">
     <p>EarnLoop is an early prototype. Points are for testing only. No real money is earned or paid. Video tasks are demonstrations, not paid advertisements.</p>
   </div>
+
 </main>
 
 <footer>EarnLoop © 2026 · Demo rewards website</footer>
 
 <script>
+/*
+  IMPORTANT:
+  Replace these two placeholder strings with your own
+  Supabase Project URL and public publishable key.
+  Never put a service-role or secret key here.
+*/
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+const authForm = document.getElementById("auth-form");
+const emailInput = document.getElementById("auth-email");
+const passwordInput = document.getElementById("auth-password");
+const signupButton = document.getElementById("signup-button");
+const loginButton = document.getElementById("login-button");
+const logoutButton = document.getElementById("logout-button");
+const authMessage = document.getElementById("auth-message");
+const accountStatus = document.getElementById("account-status");
+
+let supabaseClient = null;
+let authBusy = false;
+
+function showAuthMessage(message) {
+  authMessage.textContent = message;
+}
+
+function setAuthBusy(busy) {
+  authBusy = busy;
+  signupButton.disabled = busy;
+  loginButton.disabled = busy;
+  logoutButton.disabled = busy;
+}
+
+function updateAccount(session) {
+  const user = session && session.user;
+
+  if (user) {
+    accountStatus.textContent = "Logged in as " + user.email;
+    signupButton.hidden = true;
+    loginButton.hidden = true;
+    logoutButton.hidden = false;
+    emailInput.value = user.email || "";
+    passwordInput.value = "";
+  } else {
+    accountStatus.textContent = "You are not logged in.";
+    signupButton.hidden = false;
+    loginButton.hidden = false;
+    logoutButton.hidden = true;
+  }
+}
+
+function getSupabaseClient() {
+  if (!window.supabase || !window.supabase.createClient) {
+    showAuthMessage("Supabase library did not load. Check your internet connection and reload.");
+    return null;
+  }
+
+  if (
+    SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" ||
+    SUPABASE_PUBLISHABLE_KEY === "YOUR_SUPABASE_PUBLISHABLE_KEY"
+  ) {
+    showAuthMessage("Setup needed: add your Supabase Project URL and public publishable key in the code.");
+    return null;
+  }
+
+  if (!supabaseClient) {
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+  }
+
+  return supabaseClient;
+}
+
+authForm.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  if (authBusy) return;
+
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  setAuthBusy(true);
+  showAuthMessage("Creating your account...");
+
+  try {
+    const { data, error } = await client.auth.signUp({
+      email: emailInput.value.trim(),
+      password: passwordInput.value
+    });
+
+    if (error) throw error;
+
+    if (data.session) {
+      updateAccount(data.session);
+      showAuthMessage("Account created successfully!");
+    } else {
+      showAuthMessage("Registration submitted. Check your email for the confirmation link before logging in.");
+    }
+  } catch (error) {
+    showAuthMessage(error.message || "Registration failed. Please try again.");
+  } finally {
+    setAuthBusy(false);
+  }
+});
+
+loginButton.addEventListener("click", async function() {
+  if (authBusy) return;
+
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  if (!emailInput.value.trim() || !passwordInput.value) {
+    showAuthMessage("Enter your email address and password first.");
+    return;
+  }
+
+  setAuthBusy(true);
+  showAuthMessage("Logging in...");
+
+  try {
+    const { data, error } = await client.auth.signInWithPassword({
+      email: emailInput.value.trim(),
+      password: passwordInput.value
+    });
+
+    if (error) throw error;
+
+    updateAccount(data.session);
+    showAuthMessage("Login successful!");
+  } catch (error) {
+    showAuthMessage(error.message || "Login failed. Check your details and try again.");
+  } finally {
+    setAuthBusy(false);
+  }
+});
+
+logoutButton.addEventListener("click", async function() {
+  if (authBusy) return;
+
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  setAuthBusy(true);
+  showAuthMessage("Logging out...");
+
+  try {
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+
+    updateAccount(null);
+    showAuthMessage("You have logged out.");
+  } catch (error) {
+    showAuthMessage(error.message || "Logout failed. Please try again.");
+  } finally {
+    setAuthBusy(false);
+  }
+});
+
+async function restoreSession() {
+  const client = getSupabaseClient();
+  if (!client) return;
+
+  try {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+
+    updateAccount(data.session);
+  } catch (error) {
+    showAuthMessage("Could not check your login session. Reload the page and try again.");
+  }
+}
+
+if (window.supabase && window.supabase.createClient &&
+    SUPABASE_URL !== "https://xcbtmtkdhdufkporwgpm.supabase.co/rest/v1/" &&
+    SUPABASE_PUBLISHABLE_KEY !== "sb_publishable_T2AG4v08lWZgGfQxw3JaTg_NhDvDZvy") {
+  restoreSession();
+} else {
+  updateAccount(null);
+}
+
+/* Demo-only points: these are stored locally and are NOT secure rewards. */
 let points = Number(localStorage.getItem("earnloop_points") || 0);
+if (!Number.isFinite(points) || points < 0) points = 0;
 document.getElementById("points").textContent = points;
 
 let busy = false;
@@ -105,7 +323,7 @@ function startTask() {
     } else {
       clearInterval(timer);
       points += 10;
-      localStorage.setItem("earnloop_points", points);
+      localStorage.setItem("earnloop_points", String(points));
       document.getElementById("points").textContent = points;
       status.textContent = "10 demo points added! No cash value.";
       button.disabled = false;
@@ -116,4 +334,3 @@ function startTask() {
 </script>
 </body>
 </html>
-create earn loop homepage
